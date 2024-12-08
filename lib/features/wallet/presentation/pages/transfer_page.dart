@@ -4,14 +4,14 @@ import 'package:solrina/core/theme/app_colors.dart';
 import 'package:solrina/core/theme/app_typography.dart';
 
 class TransferPage extends StatefulWidget {
-  const TransferPage({super.key});
+  final bool isSending;
+  const TransferPage({super.key, this.isSending = true});
 
   @override
   State<TransferPage> createState() => _TransferPageState();
 }
 
 class _TransferPageState extends State<TransferPage> {
-  bool _isSending = true; 
   final _addressController = TextEditingController();
   final _amountController = TextEditingController();
 
@@ -59,15 +59,15 @@ class _TransferPageState extends State<TransferPage> {
           Expanded(
             child: _buildSegmentButton(
               title: 'Send',
-              isSelected: _isSending,
-              onTap: () => setState(() => _isSending = true),
+              isSelected: widget.isSending,
+              onTap: () => setState(() => widget.isSending = true),
             ),
           ),
           Expanded(
             child: _buildSegmentButton(
               title: 'Receive',
-              isSelected: !_isSending,
-              onTap: () => setState(() => _isSending = false),
+              isSelected: !widget.isSending,
+              onTap: () => setState(() => widget.isSending = false),
             ),
           ),
         ],
@@ -109,7 +109,7 @@ class _TransferPageState extends State<TransferPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (_isSending) ...[
+        if (widget.isSending) ...[
           _buildTextField(
             controller: _addressController,
             label: 'Recipient Address',

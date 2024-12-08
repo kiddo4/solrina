@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:solrina/core/theme/app_colors.dart';
 import 'package:solrina/core/theme/app_typography.dart';
 import 'package:solrina/core/providers/wallet_provider.dart';
 import 'package:solrina/features/home/data/model/meme_token_model.dart';
-import 'package:solrina/features/trading/presentation/pages/trading_page.dart';
+import 'package:solrina/features/wallet/presentation/pages/transfer_page.dart';
 import 'package:solrina/features/betting/presentation/pages/betting_page.dart';
 
 class MainNavigationPage extends ConsumerStatefulWidget {
@@ -20,7 +20,6 @@ class _MainNavigationPageState extends ConsumerState<MainNavigationPage> {
 
   final List<Widget> _pages = [
     const HomePage(),
-    const TradingPage(),
     const BettingPage(),
   ];
 
@@ -64,12 +63,6 @@ class _MainNavigationPageState extends ConsumerState<MainNavigationPage> {
             backgroundColor: AppColors.white,
           ),
           BottomNavigationBarItem(
-            icon: const Icon(Icons.trending_up_outlined),
-            activeIcon: const Icon(Icons.trending_up),
-            label: 'Trading',
-            backgroundColor: AppColors.white,
-          ),
-          BottomNavigationBarItem(
             icon: const Icon(Icons.casino_outlined),
             activeIcon: const Icon(Icons.casino),
             label: 'Betting',
@@ -89,7 +82,7 @@ class HomePage extends ConsumerStatefulWidget {
 }
 
 class _HomePageState extends ConsumerState<HomePage> {
-  // Static data for now
+  // Static data for meme tokens
   final List<MemeToken> _tokens = [
     MemeToken(
       name: 'DEGEN',
@@ -118,6 +111,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           _buildAppBar(),
           _buildWalletCard(walletState),
           _buildTokenSection(),
+          _buildActionButtons(),
           _buildBettingSection(),
         ],
       ),
@@ -141,57 +135,90 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 
-  SliverToBoxAdapter _buildWalletCard(WalletState walletState) {
+  Widget _buildWalletCard(WalletState walletState) {
     return SliverToBoxAdapter(
       child: Container(
         margin: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          gradient: AppColors.primaryGradient,
-          borderRadius: BorderRadius.circular(20),
+          gradient: AppColors.accentGradient,
+          borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: AppColors.yellow.withOpacity(0.4),
-              blurRadius: 15,
+              color: AppColors.yellow.withOpacity(0.3),
+              blurRadius: 20,
               offset: const Offset(0, 8),
             ),
           ],
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Total Balance',
-                style: AppTypography.bodyMedium.copyWith(
-                  color: AppColors.white.withOpacity(0.8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Wallet Balance',
+                  style: AppTypography.bodyLarge.copyWith(
+                    color: AppColors.black.withOpacity(0.7),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
+                if (!walletState.isConnected)
+                  ElevatedButton(
+                    onPressed: () {
+                      ref.read(walletStateProvider.notifier).connectWallet();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.black,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      'Connect Wallet',
+                      style: AppTypography.buttonMedium.copyWith(
+                        color: AppColors.white,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            if (walletState.isConnected) ...[
               Text(
-                '\$${walletState.balance.toStringAsFixed(2)}',
+                '${walletState.balance.toStringAsFixed(4)} SOL',
                 style: AppTypography.headlineLarge.copyWith(
-                  color: AppColors.white,
-                  fontSize: 36,
+                  color: AppColors.black,
                 ),
               ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildActionButton('Send', Icons.send),
-                  _buildActionButton('Receive', Icons.qr_code),
-                  _buildActionButton('Swap', Icons.swap_horiz),
-                ],
+              const SizedBox(height: 4),
+              Text(
+                walletState.publicKey.substring(0, 8) + '...' + walletState.publicKey.substring(walletState.publicKey.length - 8),
+                style: AppTypography.bodyMedium.copyWith(
+                  color: AppColors.black.withOpacity(0.7),
+                ),
+              ),
+            ] else ...[
+              Text(
+                '0.0000 SOL',
+                style: AppTypography.headlineLarge.copyWith(
+                  color: AppColors.black,
+                ),
               ),
             ],
-          ),
+          ],
         ),
-      ).animate().fadeIn(duration: 600.ms).slideY(begin: 0.2),
+      ),
+    ).animate().fade(
+      duration: const Duration(milliseconds: 300),
+    ).moveY(
+      begin: 20,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOutQuad,
     );
   }
 
-  SliverToBoxAdapter _buildTokenSection() {
+  Widget _buildTokenSection() {
     return SliverToBoxAdapter(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -214,74 +241,6 @@ class _HomePageState extends ConsumerState<HomePage> {
               },
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  SliverToBoxAdapter _buildBettingSection() {
-    return SliverToBoxAdapter(
-      child: Container(
-        margin: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          gradient: AppColors.accentGradient,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '50/50 Bet',
-                style: AppTypography.headlineMedium.copyWith(
-                  color: AppColors.white,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Place a bet and double your money!',
-                style: AppTypography.bodyMedium.copyWith(
-                  color: AppColors.white.withOpacity(0.8),
-                ),
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.white,
-                  foregroundColor: AppColors.black,
-                ),
-                child: Text(
-                  'Place Bet',
-                  style: AppTypography.buttonLarge.copyWith(
-                    color: AppColors.black,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ).animate().fadeIn(duration: 600.ms).slideY(begin: 0.2),
-    );
-  }
-
-  Widget _buildActionButton(String label, IconData icon) {
-    return ElevatedButton(
-      onPressed: () {},
-      style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.white.withOpacity(0.2),
-        foregroundColor: AppColors.white,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, size: 20),
-          const SizedBox(width: 8),
-          Text(label),
         ],
       ),
     );
@@ -334,22 +293,167 @@ class _HomePageState extends ConsumerState<HomePage> {
             const Spacer(),
             Text(
               '\$${token.price.toStringAsFixed(6)}',
-              style: isPositive
-                  ? AppTypography.cryptoPricePositive
-                  : AppTypography.cryptoPriceNegative,
+              style: AppTypography.bodyLarge.copyWith(
+                color: isPositive ? AppColors.cryptoPositive : AppColors.cryptoNegative,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               '${isPositive ? '+' : ''}${token.change.toStringAsFixed(2)}%',
               style: TextStyle(
-                color: isPositive
-                    ? AppColors.cryptoPositive
-                    : AppColors.cryptoNegative,
+                color: isPositive ? AppColors.cryptoPositive : AppColors.cryptoNegative,
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildActionButtons() {
+    return SliverToBoxAdapter(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16),
+        child: Row(
+          children: [
+            Expanded(
+              child: _buildActionButton(
+                icon: Icons.arrow_upward_rounded,
+                label: 'Send',
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const TransferPage(isSending: true),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildActionButton(
+                icon: Icons.arrow_downward_rounded,
+                label: 'Receive',
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const TransferPage(isSending: false),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        decoration: BoxDecoration(
+          color: AppColors.cardBackground,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: AppColors.yellow.withOpacity(0.3),
+            width: 1,
+          ),
+        ),
+        child: Column(
+          children: [
+            Icon(
+              icon,
+              color: AppColors.yellow,
+              size: 24,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              style: AppTypography.bodyLarge,
+            ),
+          ],
+        ),
+      ),
+    ).animate().fade(
+      duration: const Duration(milliseconds: 300),
+    ).moveY(
+      begin: 20,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOutQuad,
+    );
+  }
+
+  Widget _buildBettingSection() {
+    return SliverToBoxAdapter(
+      child: Container(
+        margin: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          gradient: AppColors.accentGradient,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.yellow.withOpacity(0.3),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Price Prediction',
+              style: AppTypography.headlineMedium.copyWith(
+                color: AppColors.black,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Bet on SOL price movement',
+              style: AppTypography.bodyLarge.copyWith(
+                color: AppColors.black.withOpacity(0.7),
+              ),
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const BettingPage(),
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.black,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text(
+                  'Place a Bet',
+                  style: AppTypography.buttonLarge.copyWith(
+                    color: AppColors.white,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ).animate().fade(
+      duration: const Duration(milliseconds: 300),
+    ).moveY(
+      begin: 20,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOutQuad,
     );
   }
 }
