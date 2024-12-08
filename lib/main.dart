@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:solrina/core/theme/app_theme.dart';
+import 'package:solrina/core/theme/app_colors.dart';
 import 'package:solrina/features/splash/presentation/pages/splash_page.dart';
 
 void main() {
@@ -14,7 +14,15 @@ class SolrinaApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Solrina',
-      theme: AppTheme.darkTheme,
+      theme: ThemeData(
+        brightness: Brightness.dark,
+        primaryColor: AppColors.yellow,
+        scaffoldBackgroundColor: AppColors.background,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+        ),
+      ),
       home: const SplashPage(),
       debugShowCheckedModeBanner: false,
     );
