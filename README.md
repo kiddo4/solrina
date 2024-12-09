@@ -24,7 +24,7 @@ Solrina is a cutting-edge mobile application for trading meme coins and placing 
 ## Installation
 1. Clone the repository
 ```bash
-git clone https://github.com/yourusername/solrina.git
+git clone https://github.com/kiddo4/solrina.git
 ```
 
 2. Install dependencies
