@@ -28,9 +28,7 @@ class _MainNavigationPageState extends ConsumerState<MainNavigationPage> {
 
   @override
   void initState() {
-    ref.read(walletStateProvider.notifier).connectWallet();
     super.initState();
-    
   }
 
   @override
@@ -117,6 +115,16 @@ class _HomePageState extends ConsumerState<HomePage> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!ref.read(walletStateProvider).isConnected) {
+        ref.read(walletStateProvider.notifier).connectWallet();
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final walletState = ref.watch(walletStateProvider);
 
@@ -178,29 +186,40 @@ class _HomePageState extends ConsumerState<HomePage> {
                 ),
               ),
               const SizedBox(height: 8),
-             if (walletState.isConnected) ...[
-              Text(
-                '${walletState.balance.toStringAsFixed(4)} SOL',
-                style: AppTypography.headlineLarge.copyWith(
-                  color: AppColors.black,
+              if (walletState.isConnected) ...[
+                Text(
+                  '${walletState.balance.toStringAsFixed(4)} SOL',
+                  style: AppTypography.headlineLarge.copyWith(
+                    color: AppColors.black,
+                    fontSize: 36,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                walletState.publicKey.substring(0, 8) + '...' + walletState.publicKey.substring(walletState.publicKey.length - 8),
-                style: AppTypography.bodyMedium.copyWith(
-                  color: AppColors.black.withOpacity(0.7),
+                const SizedBox(height: 4),
+                Text(
+                  walletState.publicKey.substring(0, 8) +
+                      '...' +
+                      walletState.publicKey
+                          .substring(walletState.publicKey.length - 8),
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: AppColors.black.withOpacity(0.7),
+                  ),
                 ),
-              ),
-            ] else ...[
-              Text(
-                '0.0000 SOL',
-                style: AppTypography.headlineLarge.copyWith(
-                  color: AppColors.black,
+              ] else ...[
+                Text(
+                  '0.0000 SOL',
+                  style: AppTypography.headlineLarge.copyWith(
+                    color: AppColors.black,
+                    fontSize: 36,
+                  ),
                 ),
-              ),
-            ],
-            
+                const SizedBox(height: 4),
+                Text(
+                  'Wallet not connected',
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: AppColors.black.withOpacity(0.7),
+                  ),
+                ),
+              ],
               const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -215,18 +234,26 @@ class _HomePageState extends ConsumerState<HomePage> {
                       ),
                     ),
                   ),
-                  _buildActionButton('Receive', Icons.qr_code, onTap: () => Navigator.push(
+                  _buildActionButton(
+                    'Receive',
+                    Icons.qr_code,
+                    onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => TransferPage(isSending: false),
                       ),
-                    ),),
-                  _buildActionButton('Swap', Icons.swap_horiz,onTap: () => Navigator.push(
+                    ),
+                  ),
+                  _buildActionButton(
+                    'Swap',
+                    Icons.swap_horiz,
+                    onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => const SwapPage(),
                       ),
-                    ),),
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -270,10 +297,17 @@ class _HomePageState extends ConsumerState<HomePage> {
         margin: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           gradient: AppColors.accentGradient,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.yellow.withOpacity(0.3),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+          ],
         ),
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -292,7 +326,12 @@ class _HomePageState extends ConsumerState<HomePage> {
               ),
               const SizedBox(height: 16),
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const BettingPage(),
+                  ),
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.white,
                   foregroundColor: AppColors.black,
