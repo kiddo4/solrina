@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:solrina/core/theme/app_colors.dart';
 import 'package:solrina/core/theme/app_typography.dart';
 import 'package:solrina/features/auth/data/providers/auth_provider.dart';
-import 'package:solrina/features/home/presentation/pages/home_page.dart';
+import 'package:solrina/features/main_navigation/presentation/pages/main_navigation_page.dart';
 
 class OnboardingPage extends ConsumerStatefulWidget {
   const OnboardingPage({super.key});
@@ -53,13 +53,13 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
 
     try {
       await ref.read(authProvider.notifier).createAccount(
-        _usernameController.text,
-        _passcodeController.text,
-      );
+            _usernameController.text,
+            _passcodeController.text,
+          );
 
       if (mounted) {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const HomePage()),
+          MaterialPageRoute(builder: (context) => const MainNavigationPage()),
         );
       }
     } catch (e) {

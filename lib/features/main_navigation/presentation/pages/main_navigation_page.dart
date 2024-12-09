@@ -93,7 +93,9 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.yellow.withOpacity(0.1) : Colors.transparent,
+          color: isSelected
+              ? AppColors.yellow.withOpacity(0.1)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
@@ -101,7 +103,9 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
           children: [
             Icon(
               icon,
-              color: isSelected ? AppColors.yellow : AppColors.navBarUnselectedItem,
+              color: isSelected
+                  ? AppColors.yellow
+                  : AppColors.navBarUnselectedItem,
               size: 24,
             ).animate(target: isSelected ? 1 : 0).scale(
                   begin: const Offset(1, 1),
@@ -112,7 +116,9 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
             Text(
               label,
               style: TextStyle(
-                color: isSelected ? AppColors.yellow : AppColors.navBarUnselectedItem,
+                color: isSelected
+                    ? AppColors.yellow
+                    : AppColors.navBarUnselectedItem,
                 fontSize: 12,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               ),

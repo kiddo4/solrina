@@ -4,8 +4,8 @@ import 'package:solrina/core/theme/app_colors.dart';
 import 'package:solrina/core/theme/app_typography.dart';
 
 class TransferPage extends StatefulWidget {
-  final bool isSending;
-  const TransferPage({super.key, this.isSending = true});
+  bool isSending;
+  TransferPage({super.key, this.isSending = true});
 
   @override
   State<TransferPage> createState() => _TransferPageState();
