@@ -3,34 +3,17 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:solrina/core/theme/app_colors.dart';
 import 'package:solrina/core/theme/app_typography.dart';
 
-class TransferPage extends StatelessWidget {
+class TransferPage extends StatefulWidget {
   final bool isSending;
   const TransferPage({super.key, this.isSending = true});
 
   @override
-  Widget build(BuildContext context) {
-    return _TransferPageContent(initialIsSending: isSending);
-  }
+  State<TransferPage> createState() => _TransferPageState();
 }
 
-class _TransferPageContent extends StatefulWidget {
-  final bool initialIsSending;
-  const _TransferPageContent({required this.initialIsSending});
-
-  @override
-  State<_TransferPageContent> createState() => _TransferPageContentState();
-}
-
-class _TransferPageContentState extends State<_TransferPageContent> {
-  late bool _isSending;
+class _TransferPageState extends State<TransferPage> {
   final _addressController = TextEditingController();
   final _amountController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    _isSending = widget.initialIsSending;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +25,7 @@ class _TransferPageContentState extends State<_TransferPageContent> {
             backgroundColor: Colors.transparent,
             elevation: 0,
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back),
+              icon: const Icon(Icons.arrow_back, color: AppColors.white),
               onPressed: () => Navigator.pop(context),
             ),
           ),
@@ -52,13 +35,8 @@ class _TransferPageContentState extends State<_TransferPageContent> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    _isSending ? 'Send SOL' : 'Receive SOL',
-                    style: AppTypography.headlineLarge,
-                  ),
-                  const SizedBox(height: 24),
-                  _buildSegmentControl(),
-                  const SizedBox(height: 24),
+                  _buildSegmentedControl(),
+                  const SizedBox(height: 32),
                   _buildTransferForm(),
                 ],
               ),
@@ -69,9 +47,9 @@ class _TransferPageContentState extends State<_TransferPageContent> {
     );
   }
 
-  Widget _buildSegmentControl() {
+  Widget _buildSegmentedControl() {
     return Container(
-      height: 48,
+      padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
         color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(12),
@@ -81,19 +59,25 @@ class _TransferPageContentState extends State<_TransferPageContent> {
           Expanded(
             child: _buildSegmentButton(
               title: 'Send',
-              isSelected: _isSending,
-              onTap: () => setState(() => _isSending = true),
+              isSelected: widget.isSending,
+              onTap: () => setState(() => widget.isSending = true),
             ),
           ),
           Expanded(
             child: _buildSegmentButton(
               title: 'Receive',
-              isSelected: !_isSending,
-              onTap: () => setState(() => _isSending = false),
+              isSelected: !widget.isSending,
+              onTap: () => setState(() => widget.isSending = false),
             ),
           ),
         ],
       ),
+    ).animate().fade(
+      duration: const Duration(milliseconds: 300),
+    ).moveY(
+      begin: 20,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOutQuad,
     );
   }
 
@@ -105,17 +89,17 @@ class _TransferPageContentState extends State<_TransferPageContent> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
           color: isSelected ? AppColors.yellow : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(8),
         ),
-        child: Center(
-          child: Text(
-            title,
-            style: AppTypography.buttonLarge.copyWith(
-              color: isSelected ? AppColors.black : AppColors.white,
-            ),
+        child: Text(
+          title,
+          style: AppTypography.buttonLarge.copyWith(
+            color: isSelected ? AppColors.black : AppColors.white,
           ),
+          textAlign: TextAlign.center,
         ),
       ),
     );
@@ -125,85 +109,38 @@ class _TransferPageContentState extends State<_TransferPageContent> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (_isSending) ...[
+        if (widget.isSending) ...[
           _buildTextField(
             controller: _addressController,
             label: 'Recipient Address',
-            hintText: 'Enter SOL address',
+            hint: 'Enter Solana address',
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
           _buildTextField(
             controller: _amountController,
             label: 'Amount',
-            hintText: 'Enter amount in SOL',
+            hint: 'Enter amount',
             keyboardType: TextInputType.number,
           ),
-          const SizedBox(height: 24),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {},
-              child: Text(
-                'Send SOL',
-                style: AppTypography.buttonLarge.copyWith(
-                  color: AppColors.black,
-                ),
-              ),
-            ),
-          ),
+          const SizedBox(height: 32),
+          _buildSendButton(),
         ] else ...[
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: AppColors.cardBackground,
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(
-                color: AppColors.yellow.withOpacity(0.3),
-              ),
-            ),
-            child: Column(
-              children: [
-                Container(
-                  width: 200,
-                  height: 200,
-                  color: AppColors.white,
-                  child: const Center(
-                    child: Text('QR Code'),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        '5KoJ8qhUE2yHxNQQ3Nz8rvpH6PbhawXxKKwwRoqBnK1m',
-                        style: AppTypography.bodyMedium,
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(
-                        Icons.copy,
-                        color: AppColors.yellow,
-                      ),
-                      onPressed: () {},
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
+          _buildReceiveQR(),
         ],
       ],
+    ).animate().fade(
+      duration: const Duration(milliseconds: 300),
+    ).moveY(
+      begin: 20,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOutQuad,
     );
   }
 
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
-    required String hintText,
+    required String hint,
     TextInputType? keyboardType,
   }) {
     return Column(
@@ -211,17 +148,126 @@ class _TransferPageContentState extends State<_TransferPageContent> {
       children: [
         Text(
           label,
-          style: AppTypography.bodyLarge,
+          style: AppTypography.bodyLarge.copyWith(
+            color: AppColors.secondaryText,
+          ),
         ),
         const SizedBox(height: 8),
-        TextField(
-          controller: controller,
-          keyboardType: keyboardType,
-          decoration: InputDecoration(
-            hintText: hintText,
-            hintStyle: AppTypography.bodyMedium.copyWith(
-              color: AppColors.white.withOpacity(0.5),
+        Container(
+          decoration: BoxDecoration(
+            color: AppColors.cardBackground,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: AppColors.yellow.withOpacity(0.3),
+              width: 1,
             ),
+          ),
+          child: TextField(
+            controller: controller,
+            style: AppTypography.bodyLarge.copyWith(
+              color: AppColors.white,
+            ),
+            keyboardType: keyboardType,
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: AppTypography.bodyLarge.copyWith(
+                color: AppColors.secondaryText,
+              ),
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.all(16),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSendButton() {
+    return Container(
+      width: double.infinity,
+      height: 56,
+      decoration: BoxDecoration(
+        gradient: AppColors.accentGradient,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.yellow.withOpacity(0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ElevatedButton(
+        onPressed: () {},
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: Text(
+          'Send',
+          style: AppTypography.buttonLarge,
+        ),
+      ),
+    ).animate().fade(
+      duration: const Duration(milliseconds: 300),
+    ).moveY(
+      begin: 20,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOutQuad,
+    );
+  }
+
+  Widget _buildReceiveQR() {
+    return Column(
+      children: [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: AppColors.cardBackground,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            children: [
+              Container(
+                width: 200,
+                height: 200,
+                color: AppColors.white,
+                child: const Center(
+                  child: Text('QR Code'),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Your Wallet Address',
+                style: AppTypography.bodyLarge.copyWith(
+                  color: AppColors.secondaryText,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Text(
+                      '0x1234...5678',
+                      style: AppTypography.bodyLarge,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(
+                      Icons.copy,
+                      color: AppColors.yellow,
+                    ),
+                    onPressed: () {},
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ],

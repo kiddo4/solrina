@@ -25,28 +25,21 @@ class _TradingPageState extends State<TradingPage> {
         <!DOCTYPE html>
         <html>
           <head>
-            <meta name="viewport" content="width=device-width,height=device-height, initial-scale=1.0">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <style>
-              html, body {
-                margin: 0;
-                padding: 0;
-                height: 100%;
-                overflow: hidden;
-              }
-              #tradingview_widget {
-                height: 100%;
-                width: 100%;
-              }
+              body { margin: 0; }
+              .tradingview-widget-container { height: 100vh; }
             </style>
           </head>
           <body>
-            <div class="tradingview-widget-container" style="height: 100%; width: 100%;">
+            <div class="tradingview-widget-container">
               <div id="tradingview_widget"></div>
             </div>
             <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
             <script type="text/javascript">
               new TradingView.widget({
-                "autosize": true,
+                "width": "100%",
+                "height": "100%",
                 "symbol": "BINANCE:SOLUSDT",
                 "interval": "D",
                 "timezone": "Etc/UTC",
@@ -69,22 +62,17 @@ class _TradingPageState extends State<TradingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              flex: 5,
-              child: Container(
-                color: AppColors.background,
-                child: WebViewWidget(controller: _controller),
-              ),
-            ),
-            Expanded(
-              flex: 4,
-              child: _buildTradingPanel(),
-            ),
-          ],
-        ),
+      body: Column(
+        children: [
+          Expanded(
+            flex: 3,
+            child: WebViewWidget(controller: _controller),
+          ),
+          Expanded(
+            flex: 2,
+            child: _buildTradingPanel(),
+          ),
+        ],
       ),
     );
   }
